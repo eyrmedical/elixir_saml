@@ -28,3 +28,7 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
+
+config :bankid,
+    url: "https://preprod.signicat.com/std/method/shared?id=nbid-iframe:demo:nb&target=",
+    mobile_url: "https://preprod.signicat.com/std/method/shared?id=nbid-mobil-iframe:minimum:nb&target="

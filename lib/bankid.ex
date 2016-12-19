@@ -1,74 +1,87 @@
-# defmodule SignedXml do
-# 	import SweetXml
-# 	import ExCrypto
+defmodule BankId do
+    @moduledoc """
+    Wrapper for SAML 1.1 authorization to use Norwegian bank id.
+    """
 
-# 	def validate(assertion, certificate) do
-# 		map = Base.decode64!(assertion, ignore: :whitespace)
-# 					|> initiate_map(certificate)
-		
-# 		ExPublicKey.verify( map[:digest_value], map[:signature_value], map[:public_key])
-# 		|> IO.inspect
-# 	end
+    import SweetXml
 
-# 	defp initiate_map(xml, certificate) do
-# 		%{
-# 			:digest_algorithm 		=> xpath(xml, ~x"//*[local-name()='DigestMethod']/@Algorithm") |> check_algorithm,
-# 			:digest_value 				=> xpath(xml, ~x"//*[local-name()='DigestValue']/text()") |> to_string,
-# 			:signature_algorithm 	=> xpath(xml, ~x"//*[local-name()='SignatureMethod']/@Algorithm") |> check_algorithm,
-# 			:signature_value 			=> xpath(xml, ~x"//*[local-name()='SignatureValue']/text()") |> to_string,
-# 			:x509_certificate			=> xpath(xml, ~x"//*[local-name()='X509Certificate']/text()") |> format_x509,
-# 			:public_key 					=> certificate #|> :public_key.pem_decode
-# 		}
-# 	end
+    @doc """
+    Get URL to make BankId SAML requests.
 
-# 	defp format_x509(cert) do
-# 		'-----BEGIN CERTIFICATE-----\n#{cert}\n-----END CERTIFICATE-----'
-# 		|> to_string
-# 		#|> :public_key.pem_decode
-# 	end
+        iex> generated_url = BankId.url("https://localhost:4000/bankid/verify")
+        Application.get_env(:bankid, :url) <> "https%3A%2F%2Flocalhost%3A4000%2Fbankid%2Fverify"
 
-# 	defp check_algorithm(xml) do
-# 		case (xml) do
-# 			'http://www.w3.org/2000/09/xmldsig#sha1' 						-> 'sha'
-# 			'http://www.w3.org/2001/04/xmlenc#sha256' 					-> 'sha256'
-# 			'http://www.w3.org/2001/04/xmlenc#sha512' 					-> 'sha512'
-# 			'http://www.w3.org/2000/09/xmldsig#rsa-sha1' 				-> :rsa_sha1
-# 			'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256' -> :rsa_sha256
-# 			'http://www.w3.org/2001/04/xmldsig-more#rsa-sha512' -> :rsa_sha512
-# 			'http://www.w3.org/2000/09/xmldsig#hmac-sha1' 			-> :hmac_sha1
-# 			_ -> :sha1
-# 		end
-# 	end
+        iex> BankId.url("https://localhost:4000/bankid/verify", mobile: true)
+        Application.get_env(:bankid, :mobile_url) <> "https%3A%2F%2Flocalhost%3A4000%2Fbankid%2Fverify"
+    """
+    @spec url(String.t, Keyword.t) :: String.t
+    def url(callback_url, opts \\ []) do
+        prefix = case Keyword.fetch(opts, :mobile) do
+            {:ok, _} -> Application.get_env(:bankid, :mobile_url)
+            _ -> Application.get_env(:bankid, :url)
+        end
 
-# 	defp verify_signature(document) do
-# 		:public_key.verify(document[:digest_value], 'sha', document[:signature_value], document[:internal_certificate])
-# 	end
+        prefix <> URI.encode(callback_url, &URI.char_unreserved?/1)
+    end
 
-# 	defp load_key(certificate_path) do
-# 		File.read!(certificate_path)
-# 		|> :public_key.pem_decode
-# 		|> validate_pem_length
-# 		|> load_pem_entry
-# 	end
+    @doc """
+    Verify BankId SAML response and check the assertions.
+    """
+    @spec verify(map()) :: {:ok, map()} | {:error, %BankId.InvalidResponse{}}
+    def verify(%{"SAMLResponse" => response}) do
+        case {Saml.verify(response), parse_assertions(response)}  do
+            {:ok, %{
+                uid: _,
+                national_id: _,
+                firstname: _,
+                lastname: _,
+                date_of_birth: _
+            } = data} ->
+                {:ok, data}
+            {:ok, _} ->
+                {:error, BankId.InvalidResponse.exception(message: "invalid assertions")}
+            r ->
+                IO.inspect(r)
+                {:error, BankId.InvalidResponse.generic}
+        end
+    end
+    def verify(_) do
+        {:error, BankId.InvalidResponse.generic}
+    end
 
-# 	defp validate_pem_length(pem_entries) do
-#     case length(pem_entries) do
-#       0 -> {:error, "invalid argument"}
-#       x when x > 1 -> {:error, "found multiple PEM entries, expected only 1"}
-#       x when x == 1 -> {:ok, Enum.at(pem_entries, 0)}
-#     end
-#   end
+    @doc """
+    Extract user information from the SAML assertions block.
+    """
+    def parse_assertions(response) do
+        xml = Base.decode64!(response, ignore: :whitespace, padding: false)
+        %{
+            uid: xml_assert_value(xml, "unique-id"),
+            national_id: xml_assert_value(xml, "national-id"),
+            firstname: xml_assert_value(xml, "firstname"),
+            lastname: xml_assert_value(xml, "lastname"),
+            date_of_birth: xml_assert_value(xml, "date-of-birth")
+        }
+    end
 
-#   defp load_pem_entry(pem_entry) do
-# 		{:ok, :public_key.pem_entry_decode(pem_entry)}
-#   catch
-#     kind, error ->
-#       ExPublicKey.normalize_error(kind, error)
-#   end
+    @spec xml_assert_value(String.t, String.t) :: String.t
+    defp xml_assert_value(xml, key) do
+        xpath(xml, ~x"Assertion/AttributeStatement/Attribute[contains(@AttributeName,'#{key}')]/AttributeValue/text()")
+    end
 
-# end
 
-# assertion 	= File.read!('./lib/assertion.txt')
-# certificate = File.read!('./lib/certificate.pem')
+    defmodule InvalidResponse do
+        @moduledoc """
+        Exception raised with invalid SAML response.
+        """
+    
+        defexception message: "invalid BankId SAML 1.1 response"
 
-# SignedXml.validate(assertion, certificate)
+        def generic do
+            exception(message: "invalid BankId SAML 1.1 response")
+        end
+
+        def exception(opts) do
+            %InvalidResponse{message: Keyword.fetch!(opts, :message)}
+        end
+    end
+end
