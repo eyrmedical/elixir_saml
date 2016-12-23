@@ -31,13 +31,19 @@ defmodule BankId do
     def verify(%{"SAMLResponse" => response}) do
         case {Saml.verify(response), parse_assertions(response)}  do
             {:ok, %{
-                uid: _,
-                national_id: _,
+                uid: uid,
+                national_id: national_id,
                 firstname: _,
                 lastname: _,
                 date_of_birth: _
             } = data} ->
-                {:ok, data}
+                {:ok, %{
+                    uid: to_string(uid),
+                    national_id: to_string(national_id),
+                    firstname: to_string(firstname),
+                    lastname: to_string(lastname),
+                    date_of_birth: to_string(date_of_birth)
+                }}
             {:ok, _} ->
                 {:error, BankId.InvalidResponse.exception(message: "invalid assertions")}
             r ->
