@@ -33,9 +33,9 @@ defmodule BankId do
             {:ok, %{
                 uid: uid,
                 national_id: national_id,
-                firstname: _,
-                lastname: _,
-                date_of_birth: _
+                firstname: firstname,
+                lastname: lastname,
+                date_of_birth: date_of_birth
             } = data} ->
                 {:ok, %{
                     uid: to_string(uid),
