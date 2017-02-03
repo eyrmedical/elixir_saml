@@ -30,7 +30,6 @@ A BankID authentication cycle happens like this:
 
 
 
-
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
