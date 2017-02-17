@@ -3,7 +3,7 @@ defmodule Bankid.Mixfile do
 
     def project do
         [app: :bankid,
-         version: "0.1.1",
+         version: "0.1.3",
          elixir: "~> 1.3",
          build_embedded: Mix.env == :prod,
          start_permanent: Mix.env == :prod,
@@ -23,7 +23,7 @@ defmodule Bankid.Mixfile do
     #
     # Or git/path repositories:
     #
-    #     {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
+    #     {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.3"}
     #
     # Type "mix help deps" for more examples and options
     defp deps do
