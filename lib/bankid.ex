@@ -30,6 +30,8 @@ defmodule BankId do
     @spec verify(map()) :: {:ok, map()} | {:error, %BankId.InvalidResponse{}}
     def verify(%{"SAMLResponse" => response}) do
 
+        IO.puts "Veifying SAML response"
+
         case {Saml.verify(response), process_assertion(response)} do
 
             {:ok, {:ok, %{
@@ -95,18 +97,19 @@ defmodule BankId do
         not_before =
             xpath(xml, ~x"//*[local-name()='Conditions']/@NotBefore")
             |> to_string
-            |> DateTime.from_iso8601()
+            |> DateTime.from_iso8601
             |> compare_date
 
         not_on_or_after =
             xpath(xml, ~x"//*[local-name()='Conditions']/@NotOnOrAfter")
             |> to_string
-            |> DateTime.from_iso8601()
+            |> DateTime.from_iso8601
             |> compare_date
 
         case {not_before, not_on_or_after} do
-            {:gt, :lt} -> {:ok, "Date check passed"}
             # {:gt, :gt} -> {:ok, "TEST ONLY: Fake date check passed"}
+
+            {:gt, :lt} -> {:ok, "Date check passed"}
             {:lt, _} -> {:error, "Current date is before NotBefore date"}
             {_, :gt} -> {:error, "Current date is after NotOnOrAfter date"}
             {_, :eq} -> {:error, "Current date is on NotOnOrAfter date"}
@@ -175,20 +178,3 @@ defmodule BankId do
         end
     end
 end
-
-
-
-            # {:ok, %{
-            #     uid: uid,
-            #     national_id: national_id,
-            #     firstname: firstname,
-            #     lastname: lastname,
-            #     date_of_birth: date_of_birth
-            # }} ->
-            #     {:ok, %{
-            #         uid: to_string(uid),
-            #         national_id: to_string(national_id),
-            #         firstname: to_string(firstname),
-            #         lastname: to_string(lastname),
-            #         date_of_birth: to_string(date_of_birth)
-            #     }}
