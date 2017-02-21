@@ -118,8 +118,11 @@ defmodule BankId do
     end
 
     defp compare_date(date) do
+      # Add a recommended offset of 5 seconds
+
+      now = DateTime.utc_now()
        case date do
-            {:ok, date, _} -> DateTime.compare(DateTime.utc_now(), date)
+            {:ok, date, _} -> now |> Map.put(:second, now.second + 5) |> DateTime.compare(date)
             _ -> :err
         end
     end
