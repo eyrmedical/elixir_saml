@@ -17,4 +17,10 @@ defmodule BankIdTest do
     defp parse_bin("SAMLResponse:" <> response) do
         %{"SAMLResponse" => response}
     end
+
+    test "Determine gender from Norwegian national ID" do
+      response = parse_bin(File.read!("./test/bankid_response.txt"))
+      {:ok, %{ gender: gender }} = BankId.verify(response)
+      assert gender == "male"
+    end
 end
