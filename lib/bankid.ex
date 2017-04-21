@@ -174,8 +174,8 @@ defmodule BankId do
         }
     end
 
-    @spec determine_gender(String.t, String.t) :: String.t
-    defp determine_gender(nor_national_id) when is_string(nor_national_id) do
+    @spec determine_gender(String.t) :: String.t
+    defp determine_gender(nor_national_id) do
       {charcode, _} = List.pop_at(nor_national_id, 8)
       case [charcode] |> List.to_integer |> rem(2) do
         1 -> "male"
