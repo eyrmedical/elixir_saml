@@ -119,7 +119,7 @@ defmodule NorwegianBankID do
 
   @spec determine_gender(String.t) :: String.t
   defp determine_gender(nor_national_id) do
-    {charcode, _} = String.to_charlist |> List.pop_at(nor_national_id, 8)
+    {charcode, _} = nor_national_id |> String.to_charlist |> List.pop_at(8)
     case [charcode] |> List.to_integer |> rem(2) do
       1 -> "male"
       0 -> "female"
