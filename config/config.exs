@@ -10,11 +10,11 @@ use Mix.Config
 
 # You can configure for your application as:
 #
-#     config :bankid, key: :value
+#     config :elixir_saml, key: :value
 #
 # And access this configuration in your application as:
 #
-#     Application.get_env(:bankid, :key)
+#     Application.get_env(:elixir_saml, :key)
 #
 # Or configure a 3rd-party app:
 #
@@ -28,7 +28,3 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
-
-config :bankid,
-    url: "https://preprod.signicat.com/std/method/shared?id=nbid-iframe:demo:nb&target=",
-    mobile_url: "https://preprod.signicat.com/std/method/shared?id=nbid-mobil-iframe:minimum:nb&target="

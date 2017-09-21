@@ -1,9 +1,9 @@
-defmodule Bankid.Mixfile do
+defmodule ElixirSAML.Mixfile do
     use Mix.Project
 
     def project do
         [app: :elixir_saml,
-         version: "0.1.7",
+         version: "0.1.8",
          elixir: "~> 1.4",
          build_embedded: Mix.env == :prod,
          start_permanent: Mix.env == :prod,
@@ -28,8 +28,9 @@ defmodule Bankid.Mixfile do
     # Type "mix help deps" for more examples and options
     defp deps do
         [
-            {:sweet_xml, "~> 0.6.1"},
-            {:esaml, github: "eyrmedical/esaml"}
+            {:sweet_xml, "~> 0.6.5"},
+            {:esaml, github: "eyrmedical/esaml"},
+            {:ex_doc, "~> 0.16", only: :dev, runtime: false}
         ]
     end
 end

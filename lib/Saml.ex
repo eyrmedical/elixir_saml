@@ -89,6 +89,7 @@ defmodule SAML do
     @spec extract_assertion_attribute_as_string(xml, attribute_name) :: attribute_string_value
     def extract_assertion_attribute_as_string(xml, attribute_name) do
         extract_assertion_attribute(xml, attribute_name)
+        |> to_string()
     end
 
     @doc """
@@ -163,13 +164,13 @@ defmodule SAML do
 
                 #{elem(result, 1)}
 
-                not_before:         #{DateTime.to_string(not_before)}
-                now:                #{DateTime.to_string(now)}
-                not_on_or_after:    #{DateTime.to_string(not_on_or_after)}
+                SAML not before:         #{DateTime.to_string(not_before)}
+                Server time:             #{DateTime.to_string(now)}
+                SAML not on or after:    #{DateTime.to_string(not_on_or_after)}
                 
                 The SAML response timestamp is inconsistent with server time.
 
-                If you see this error in production you may lax the latency
+                If you see this error in production you should lax the latency
                 compensation in config, although it is recommended to keep it at
                 5 seconds or lower.
 
