@@ -1,40 +1,40 @@
-defmodule BankId do
+defmodule NemId do
   @moduledoc """
-  Wrapper for SAML 1.1 authorization to use Norwegian bank id.
+  Wrapper for SAML 1.1 authorization to use Danish NemID.
   """
 
   import SweetXml
 
   @doc """
-  Read SAML BankId settings.
+  Read SAML NemId settings.
   """
   def config(key, default \\ nil) do
-    Keyword.get(Application.get_env(:saml, BankId), key, default)
+    Keyword.get(Application.get_env(:saml, NemId), key, default)
   end
 
   @doc """
-  Get URL to make BankId SAML requests.
+  Get URL to make NemID SAML requests.
 
-    iex> BankId.url("https://localhost:4000/bankid/verify")
-    BankId.config(:url) <> "https%3A%2F%2Flocalhost%3A4000%2Fbankid%2Fverify"
+    iex> NemId.url("https://localhost:4000/nemid/verify")
+    NemId.config(:url) <> "https%3A%2F%2Flocalhost%3A4000%2Fnemid%2Fverify"
 
-    iex> BankId.url("https://localhost:4000/bankid/verify", mobile: true)
-    BankId.config(:mobile_url) <> "https%3A%2F%2Flocalhost%3A4000%2Fbankid%2Fverify"
+    iex> NemId.url("https://localhost:4000/nemid/verify", mobile: true)
+    NemId.config(:mobile_url) <> "https%3A%2F%2Flocalhost%3A4000%2Fnemid%2Fverify"
   """
   @spec url(String.t, Keyword.t) :: String.t
   def url(callback_url, opts \\ []) do
     prefix = case Keyword.fetch(opts, :mobile) do
-      {:ok, _} -> BankId.config(:mobile_url)
-      _ -> BankId.config(:url)
+      {:ok, _} -> config(:mobile_url)
+      _ -> config(:url)
     end
 
     prefix <> URI.encode(callback_url, &URI.char_unreserved?/1)
   end
 
   @doc """
-  Verify BankId SAML response and check the assertions.
+  Verify NemId SAML response and check the assertions.
   """
-  @spec verify(map()) :: {:ok, map()} | {:error, %BankId.InvalidResponse{}}
+  @spec verify(map()) :: {:ok, map()} | {:error, %NemId.InvalidResponse{}}
   def verify(%{"SAMLResponse" => response}) do
     case {Saml.verify(response), parse_assertions(response)}  do
       {:ok, %{
@@ -52,14 +52,14 @@ defmodule BankId do
           date_of_birth: to_string(date_of_birth)
         }}
       {:ok, _} ->
-        {:error, BankId.InvalidResponse.exception(message: "invalid assertions")}
+        {:error, NemId.InvalidResponse.exception(message: "invalid assertions")}
       r ->
         IO.inspect(r)
-        {:error, BankId.InvalidResponse.generic}
+        {:error, NemId.InvalidResponse.generic}
     end
   end
   def verify(_) do
-    {:error, BankId.InvalidResponse.generic}
+    {:error, NemId.InvalidResponse.generic}
   end
 
   @doc """
@@ -87,10 +87,10 @@ defmodule BankId do
     Exception raised with invalid SAML response.
     """
   
-    defexception message: "invalid BankId SAML 1.1 response"
+    defexception message: "invalid NemId SAML 1.1 response"
 
     def generic do
-      exception(message: "invalid BankId SAML 1.1 response")
+      exception(message: "invalid NemId SAML 1.1 response")
     end
 
     def exception(opts) do

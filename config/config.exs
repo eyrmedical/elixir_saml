@@ -29,6 +29,10 @@ use Mix.Config
 #
 #     import_config "#{Mix.env}.exs"
 
-config :bankid,
+config :saml, BankId,
     url: "https://preprod.signicat.com/std/method/shared?id=nbid-iframe:demo:nb&target=",
-    mobile_url: "https://preprod.signicat.com/std/method/shared?id=nbid-mobil-iframe:minimum:nb&target="
+    mobile_url: "https://preprod.signicat.com/std/method/shared?id=nbid-mobil-iframe:minimum:da&target="
+
+config :saml, NemId,
+    url: "https://preprod.signicat.com/std/method/shared?id=nemid-iframe:demo:nb&target=",
+    mobile_url: "https://preprod.signicat.com/std/method/shared?id=nemid-mobil-iframe:minimum:da&target="

@@ -8,64 +8,64 @@ defmodule Saml do
 
 	import SweetXml
 
-    @doc """
-    Verify that assertion was signed by certificate.
+  @doc """
+  Verify that assertion was signed by certificate.
 
-        iex> assertion = File.read!("./test/assertion.txt")
-        iex> certificate = File.read!("./test/certificate.pem")
-        iex> Saml.verify_signature(assertion, certificate)
-        true
-    """
+      iex> assertion = File.read!("./test/assertion.txt")
+      iex> certificate = File.read!("./test/certificate.pem")
+      iex> Saml.verify_signature(assertion, certificate)
+      true
+  """
 	def verify_signature(assertion, certificate) when is_binary(assertion) do
 		Base.decode64!(assertion, ignore: :whitespace, padding: false)
 		|> initiate_map(certificate)
 		|> validate(assertion)
 	end
 
-    @doc """
-    Verify that assertion was signed by certificate using Erlang native modules.
-    Keep in mind that we don't verify digest for the assertion block.
+  @doc """
+  Verify that assertion was signed by certificate using Erlang native modules.
+  Keep in mind that we don't verify digest for the assertion block.
 
-        iex> assertion = File.read!("./test/assertion.txt")
-        iex> Saml.verify(assertion)
-        :ok
-    """
-    def verify(assertion) do
-        xml = Base.decode64!(assertion, ignore: :whitespace, padding: false)
-        {doc, []} =
-            xml
-            |> :binary.bin_to_list
-            |> :xmerl_scan.string([quiet: true])
+      iex> assertion = File.read!("./test/assertion.txt")
+      iex> Saml.verify(assertion)
+      :ok
+  """
+  def verify(assertion) do
+    xml = Base.decode64!(assertion, ignore: :whitespace, padding: false)
+    {doc, []} =
+      xml
+      |> :binary.bin_to_list
+      |> :xmerl_scan.string([quiet: true])
 
-        :xmerl_dsig.verify(doc)
-    end
+    :xmerl_dsig.verify(doc)
+  end
 
 	defp validate(map, _assertion) do
 		:public_key.verify(
-            map[:data],
-            map[:digest_algorithm],
-            map[:signature_value],
-            map[:public_key]
-        )
+      map[:data],
+      map[:digest_algorithm],
+      map[:signature_value],
+      map[:public_key]
+    )
 	end
 
 	defp initiate_map(xml, certificate) do
-        signature = xml
-        |> xpath(~x"ds:Signature")
-        |> :xmerl_c14n.c14n
-        |> xpath(~x"ds:SignatureValue/text()")
-        |> :erlang.list_to_binary
-        |> String.replace("\r", "", global: true)
-        |> String.replace("\n", "", global: true)
-        |> Base.decode64!
+    signature = xml
+    |> xpath(~x"ds:Signature")
+    |> :xmerl_c14n.c14n
+    |> xpath(~x"ds:SignatureValue/text()")
+    |> :erlang.list_to_binary
+    |> String.replace("\r", "", global: true)
+    |> String.replace("\n", "", global: true)
+    |> Base.decode64!
 
-        data = xml
-        |> xpath(~x"ds:Signature/ds:SignedInfo")
-        |> :xmerl_c14n.c14n
-        |> :erlang.list_to_binary
+    data = xml
+    |> xpath(~x"ds:Signature/ds:SignedInfo")
+    |> :xmerl_c14n.c14n
+    |> :erlang.list_to_binary
 
 		%{
-            :data                   => data,
+      :data                   => data,
 			:digest_algorithm 		=> xpath(xml, ~x"//*[local-name()='DigestMethod']/@Algorithm") |> check_algorithm,
 			:digest_value 			=> xpath(xml, ~x"//*[local-name()='DigestValue']/text()") |> to_string,
 			:signature_algorithm 	=> xpath(xml, ~x"//*[local-name()='SignatureMethod']/@Algorithm") |> check_algorithm,
@@ -96,14 +96,14 @@ defmodule Saml do
 
 	defp decode_pem(binary) when is_binary(binary) do
 		[{:Certificate, cert, :not_encrypted}] = :public_key.pem_decode(binary)
-        decoded_cert = :public_key.pkix_decode_cert(cert, :otp)
-        {:OTPCertificate, 
-            {:OTPTBSCertificate, _, _, _, _, _, _,
-                {:OTPSubjectPublicKeyInfo, _,
-                    {:RSAPublicKey, public_key, size}
-                }, _, _, _
-            }, _, _
-        } = decoded_cert
-        {:RSAPublicKey, public_key, size}
+    decoded_cert = :public_key.pkix_decode_cert(cert, :otp)
+    {:OTPCertificate, 
+        {:OTPTBSCertificate, _, _, _, _, _, _,
+            {:OTPSubjectPublicKeyInfo, _,
+                {:RSAPublicKey, public_key, size}
+            }, _, _, _
+        }, _, _
+    } = decoded_cert
+    {:RSAPublicKey, public_key, size}
 	end
 end
