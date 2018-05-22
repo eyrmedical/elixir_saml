@@ -1,109 +1,188 @@
-defmodule Saml do
-    @moduledoc """
-    Verify consistency of SAML 1.0 requests.
-    Then you need just to verify your signature - use verify_signature.
-    Full verification is done by esaml Erlang library, but keep in mind that
-    we don't verify SAML 1.0 assertions in it.
-    """
-
-	import SweetXml
-
-  @doc """
-  Verify that assertion was signed by certificate.
-
-      iex> assertion = File.read!("./test/assertion.txt")
-      iex> certificate = File.read!("./test/certificate.pem")
-      iex> Saml.verify_signature(assertion, certificate)
-      true
+defmodule SAML do
+  @moduledoc """
+  Verify consistency of SAML 1.0 requests.
+  Then you need just to verify your signature - use verify_signature.
+  Full verification is done by esaml Erlang library, but keep in mind that
+  we don't verify SAML 1.0 assertions in it.
   """
-	def verify_signature(assertion, certificate) when is_binary(assertion) do
-		Base.decode64!(assertion, ignore: :whitespace, padding: false)
-		|> initiate_map(certificate)
-		|> validate(assertion)
-	end
+  import SweetXml
+  require Logger
+
+  @latency_compensation Application.get_env(:elixir_saml, :latency_compensation, 0)
+  #@env Mix.env()
+
+  @typedoc "XML formatted string"
+  @type xml :: String.t()
+
+  @typedoc "XML AttributeName"
+  @type attribute_name :: String.t()
+
+  @typedoc "XML AttributeValue"
+  @type attribute_value :: any()
+
+  @typedoc "XML AttributeValue as string"
+  @type attribute_string_value :: String.t()
+
+  @typedoc "SAML Base64 encoded response"
+  @type saml_base_64 :: String.t()
+
+  @typedoc "Conditions dates"
+  @type conditions_dates :: {atom(), %DateTime{}, %DateTime{}} | {atom(), String.t()}
+
+  @typedoc "Current date"
+  @type current_date :: %DateTime{}
+
+  @typedoc "SweeXML path sigil `~xpath`"
+  @type path :: any()
 
   @doc """
   Verify that assertion was signed by certificate using Erlang native modules.
   Keep in mind that we don't verify digest for the assertion block.
-
-      iex> assertion = File.read!("./test/assertion.txt")
-      iex> Saml.verify(assertion)
-      :ok
+  
+    Examples
+    iex> assertion = File.read!("./test/assets/assertion.txt")
+    iex> SAML.verify!(assertion)
+    :ok
   """
+  @spec verify(saml_base_64) :: {atom(), xml}
   def verify(assertion) do
-    xml = Base.decode64!(assertion, ignore: :whitespace, padding: false)
     {doc, []} =
-      xml
+      decode!(assertion)
       |> :binary.bin_to_list
       |> :xmerl_scan.string([quiet: true])
 
-    :xmerl_dsig.verify(doc)
+    {:xmerl_dsig.verify(doc), doc}
   end
 
-	defp validate(map, _assertion) do
-		:public_key.verify(
-      map[:data],
-      map[:digest_algorithm],
-      map[:signature_value],
-      map[:public_key]
-    )
-	end
+  @spec verify!(saml_base_64) :: atom()
+  def verify!(assertion) do
+    case verify(assertion) do
+      {:ok, _doc} -> :ok
+      _ -> :error
+    end
+  end
 
-	defp initiate_map(xml, certificate) do
-    signature = xml
-    |> xpath(~x"ds:Signature")
-    |> :xmerl_c14n.c14n
-    |> xpath(~x"ds:SignatureValue/text()")
-    |> :erlang.list_to_binary
-    |> String.replace("\r", "", global: true)
-    |> String.replace("\n", "", global: true)
-    |> Base.decode64!
+  @doc """
+  Decodes SAML assertion from Base64
+  """
+  @spec decode(saml_base_64) :: {atom(), xml}
+  def decode(saml_response) do
+    Base.decode64(saml_response, ignore: :whitespace, padding: false)
+  end
 
-    data = xml
-    |> xpath(~x"ds:Signature/ds:SignedInfo")
-    |> :xmerl_c14n.c14n
-    |> :erlang.list_to_binary
+  @spec decode!(saml_base_64) :: xml
+  def decode!(saml_response) do
+    case decode(saml_response) do
+      {:ok, xml} -> xml
+      _ -> :error
+    end
+  end
 
-		%{
-      :data                   => data,
-			:digest_algorithm 		=> xpath(xml, ~x"//*[local-name()='DigestMethod']/@Algorithm") |> check_algorithm,
-			:digest_value 			=> xpath(xml, ~x"//*[local-name()='DigestValue']/text()") |> to_string,
-			:signature_algorithm 	=> xpath(xml, ~x"//*[local-name()='SignatureMethod']/@Algorithm") |> check_algorithm,
-			:signature_value 		=> signature,
-			:x509_certificate		=> xpath(xml, ~x"//*[local-name()='X509Certificate']/text()") |> format_x509,
-			:assertion				=> xpath(xml, ~x"//*[local-name()='Assertion']/text()") |> IO.inspect,
-			:public_key 			=> certificate |> decode_pem
-		}
-	end
 
-	defp check_algorithm(algorithm) do
-		case algorithm do
-			'http://www.w3.org/2000/09/xmldsig#sha1' 					-> :sha
-			'http://www.w3.org/2001/04/xmlenc#sha256' 					-> :sha256
-			'http://www.w3.org/2001/04/xmlenc#sha512' 					-> :sha512
-			'http://www.w3.org/2000/09/xmldsig#rsa-sha1' 				-> :sha
-			'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'         -> :sha256
-			'http://www.w3.org/2001/04/xmldsig-more#rsa-sha512'         -> :sha512
-			'http://www.w3.org/2000/09/xmldsig#hmac-sha1'               -> :hmac_sha1
-			_                                                           -> :sha
-		end
-	end
+  @doc """
+  Extracts Assertion Attributes from SAML document.
+  """
+  @spec extract_assertion_attribute(xml, attribute_name) :: attribute_value
+  def extract_assertion_attribute(xml, attribute_name) do
+    xpath(xml, ~x"Assertion/AttributeStatement/Attribute[contains(@AttributeName,'#{attribute_name}')]/AttributeValue/text()")
+  end
+  @spec extract_assertion_attribute_as_string(xml, attribute_name) :: attribute_string_value
+  def extract_assertion_attribute_as_string(xml, attribute_name) do
+    extract_assertion_attribute(xml, attribute_name)
+    |> to_string()
+  end
 
-	defp format_x509(cert) do
-		"-----BEGIN CERTIFICATE-----\n#{cert}\n-----END CERTIFICATE-----"
-		|> decode_pem
-	end
+  @doc """
+  Extracts Condition statement from SAML document.
+  """
+  @spec extract_condition(xml, attribute_name) :: attribute_string_value
+  def extract_condition(xml, attribute_name) do
+    xpath(xml, ~x"//*[local-name()='Conditions']/@#{attribute_name}")
+    |> to_string
+  end
 
-	defp decode_pem(binary) when is_binary(binary) do
-		[{:Certificate, cert, :not_encrypted}] = :public_key.pem_decode(binary)
-    decoded_cert = :public_key.pkix_decode_cert(cert, :otp)
-    {:OTPCertificate, 
-        {:OTPTBSCertificate, _, _, _, _, _, _,
-            {:OTPSubjectPublicKeyInfo, _,
-                {:RSAPublicKey, public_key, size}
-            }, _, _, _
-        }, _, _
-    } = decoded_cert
-    {:RSAPublicKey, public_key, size}
-	end
+  @doc """
+  Extract SAML value from XML path.
+  """
+  @spec extract_value(xml, path) :: any()
+  def extract_value(xml, path) do
+    xpath(xml, string_to_path(path))
+  end
+
+    @doc """
+  Extract SAML value from XML path.
+  """
+  @spec extract_value(xml, path) :: any()
+  def extract_string_value(xml, path) do
+    extract_value(xml, path) |> to_string()
+  end
+
+  @doc """
+  Extract dates from Condition statement from SAML document
+  """
+  @spec extract_condition_dates(xml) :: conditions_dates
+  def extract_condition_dates(xml) do
+    with \
+      {:ok, %DateTime{} = not_before, _} <- extract_condition(xml, "NotBefore") |> DateTime.from_iso8601(),
+      {:ok, %DateTime{} = not_on_or_after, _} <- extract_condition(xml, "NotOnOrAfter") |> DateTime.from_iso8601()
+    do
+      {:ok, not_before, not_on_or_after}
+    else
+      _ -> {:error, "Could not find condition dates in SAML document"}
+    end
+  end 
+
+  @doc """
+  Check that current date is within `<Conditions NotBefore="date" NotOnOrAfter="date" />`.
+
+  Set `latency_compensation: 5` in config to set the recommended 5 seconds.
+  """
+  @spec compare_condition_dates(conditions_dates, current_date) :: {atom(), String.t()}
+  def compare_condition_dates({:ok, not_before, not_on_or_after}, now \\ DateTime.utc_now()) do
+    
+    # Adds the recommended latency compensation (5 seconds)
+    now = Map.put(now, :seconds, now.second + @latency_compensation)
+
+    result = case {DateTime.compare(now, not_before), DateTime.compare(now, not_on_or_after)} do
+      {:gt, :lt} ->
+        {:ok, "Date check passed"}
+      {:lt, _} ->
+        {:error, "Server time is before the SAML NotBefore date."}
+      {_, :gt} ->
+        {:error, "Server time is after the SAML NotBefore date."}
+      {_, :eq} ->
+        {:error, "Server time is equal to the SAML NotOnOrAfter."}
+      _ ->
+        {:error, "Invalid dates passed to SAML Conditions"}
+    end
+
+    if elem(result, 0) === :error  do
+      Logger.error fn () -> """
+
+        #{elem(result, 1)}
+
+        SAML not before:     #{DateTime.to_string(not_before)}
+        Server time:       #{DateTime.to_string(now)}
+        SAML not on or after:  #{DateTime.to_string(not_on_or_after)}
+        
+        The SAML response timestamp is inconsistent with server time.
+
+        If you see this error in production you should lax the latency
+        compensation in config, although it is recommended to keep it at
+        5 seconds or lower.
+
+        If you see this error in development the most common cause is that
+        the time of your docker container has drifted, which can happen if
+        your computer is sleeping.
+        """
+      end
+    end
+
+    result
+  end
+
+  @spec string_to_path(String.t()) :: path
+  defp string_to_path(string) do 
+    ~x"#{string}"
+  end
 end
