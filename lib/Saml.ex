@@ -17,9 +17,6 @@ defmodule SAML do
     @typedoc "XML AttributeName"
     @type attribute_name :: String.t()
 
-    @typedoc "XML AttributeValue"
-    @type attribute_value :: any()
-
     @typedoc "XML AttributeValue as string"
     @type attribute_string_value :: String.t()
 
@@ -35,32 +32,26 @@ defmodule SAML do
     @typedoc "SweeXML path sigil `~xpath`"
     @type path :: any()
 
-    @doc """
-    Verify that assertion was signed by certificate using Erlang native modules.
-    Keep in mind that we don't verify digest for the assertion block.
-    
-        Examples
-        iex> assertion = File.read!("./test/assets/assertion.txt")
-        iex> SAML.verify!(assertion)
-        :ok
-    """
-    @spec verify(saml_base_64) :: {atom(), xml}
-    def verify(assertion) do
-        {doc, []} =
-            decode!(assertion)
-            |> :binary.bin_to_list
-            |> :xmerl_scan.string([quiet: true])
+    defmodule InvalidResponse do
+        @moduledoc """
+        Exception raised with invalid SAML response.
+        """
+        defexception message: "Invalid SAML 1.1 response"
 
-        {:xmerl_dsig.verify(doc), doc}
-    end
+        def generic do
+            exception(message: "Invalid SAML 1.1 response")
+        end
 
-    @spec verify!(saml_base_64) :: atom()
-    def verify!(assertion) do
-        case verify(assertion) do
-            {:ok, _doc} -> :ok
-            _ -> :error
+        def invalid_signature do
+            exception(message: "Invalid SAML signature")
+        end
+
+        def exception(opts) do
+            %InvalidResponse{message: Keyword.fetch!(opts, :message)}
         end
     end
+
+
 
     @doc """
     Decodes SAML assertion from Base64
@@ -82,10 +73,6 @@ defmodule SAML do
     @doc """
     Extracts Assertion Attributes from SAML document.
     """
-    @spec extract_assertion_attribute(xml, attribute_name) :: attribute_value
-    def extract_assertion_attribute(xml, attribute_name) do
-        xpath(xml, ~x"Assertion/AttributeStatement/Attribute[contains(@AttributeName,'#{attribute_name}')]/AttributeValue/text()")
-    end
     @spec extract_assertion_attribute_as_string(xml, attribute_name) :: attribute_string_value
     def extract_assertion_attribute_as_string(xml, attribute_name) do
         extract_assertion_attribute(xml, attribute_name)
@@ -159,7 +146,7 @@ defmodule SAML do
                 {:error, "Invalid dates passed to SAML Conditions"}
         end
 
-        if elem(result, 0) === :error  do
+        if elem(result, 0) === :error do
             Logger.error fn () -> """
 
                 #{elem(result, 1)}
@@ -176,7 +163,7 @@ defmodule SAML do
 
                 If you see this error in development the most common cause is that
                 the time of your docker container has drifted, which can happen if
-                your computer is sleeping.
+                your computer has been suspended since you started the container.
                 """
             end
         end

@@ -1,4 +1,4 @@
-defmodule NorwegianBankID do
+defmodule SAML.NorwegianBankID do
 	@moduledoc """
 	Wrapper for SAML 1.1 authorization to parse Signicat's Norwegian BankID response.
 	"""

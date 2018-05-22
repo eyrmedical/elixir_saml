@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<!-- IMPORTANT: This is a sample document, it will fail signature checks due to encoding, use the 64-bit encoded reponses for testing -->
+<Response xmlns="urn:oasis:names:tc:SAML:1.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:1.0:assertion" xmlns:samlp="urn:oasis:names:tc:SAML:1.0:protocol" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IssueInstant="2018-05-16T10:16:20.077Z" MajorVersion="1" MinorVersion="1" Recipient="https://preprod.signicat.com/james/response" ResponseID="_edd2d244216f706c9b94206332619dea">
+  <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+    <ds:SignedInfo>
+      <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+      <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+      <ds:Reference URI="#_edd2d244216f706c9b94206332619dea">
+        <ds:Transforms>
+          <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+          <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#">
+            <ec:InclusiveNamespaces xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#" PrefixList="code ds kind rw saml samlp typens #default xsd xsi"/>
+          </ds:Transform>
+        </ds:Transforms>
+        <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+        <ds:DigestValue>Y+CDvtBpTyvwLoTh4rAj/J6JNZ0=</ds:DigestValue>
+      </ds:Reference>
+    </ds:SignedInfo>
+    <ds:SignatureValue>
+			jElshzx6wYKePyPOvHstPdPGXaTetP27GfMqnwjw7SQKNExAc13/FCxG79HEy/2EBQ1gsmDoFgcQ
+			SvmgS5mkxLNuZaFbaqOk+lXoTHkYe3XSo/1sYrgCImUkyxkuUtJpVJrXrD01g/H26XduOvb5D3Jo
+			VqIt3F6unvPELiizI4REzlRe/GwlsdohWXJ7qePEJ1q8i/E8HrnIdcnJquFXdgkp7JwZnhHJSQgS
+			YjRAnbOYP4Z4Na6cvSRbGDep+bqyhsybqFjgoVnTNzg7O3pMmZ5uJb2T+3GB9IeEbMVE4ZfKVtCP
+			8+c0jF7QLr/3+4wE4SmUhQ1BPJFjch5/XPuyrA==
+		</ds:SignatureValue>
+    <ds:KeyInfo>
+      <ds:X509Data>
+        <ds:X509Certificate>
+				MIIDuzCCAqOgAwIBAgIBEjANBgkqhkiG9w0BAQsFADBJMQswCQYDVQQGEwJOTzEUMBIGA1UEChML
+				U2lnbmljYXQgQVMxJDAiBgNVBAMTG1NpZ25pY2F0IEV4dGVybmFsIENBICgyMDQ4KTAeFw0xNzA3
+				MDUwOTM3MzNaFw0xOTA3MDUwOTM3MzNaMHgxCzAJBgNVBAYTAk5PMQ8wDQYDVQQIDAZOb3J3YXkx
+				EjAQBgNVBAcMCVRyb25kaGVpbTERMA8GA1UECgwIU2lnbmljYXQxETAPBgNVBAsMCFNpZ25pY2F0
+				MR4wHAYDVQQDDBV0ZXN0LnNpZ25pY2F0LmNvbS9zdGQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
+				ggEKAoIBAQCyBY8hhOJIEw9flwQXOe+Kc1yDLeZBIgiiToip1wXW2f0vlFgr+UA0CMZHkrimekbu
+				uLRR2QDw9+4EWs5TASgdeKfUkVrgpvpY7CE0PxvSDhMTE9dRlWd/fFQrnPFsu6UES9Mg1c0jGDci
+				S3doqOT0OlPM2E4FP06Sdkq9wBp90KEZPoM6uZYFw2iOg4NpXAbmgvdRLLJV7GZhwTqrJDKSovNl
+				SzojhCM6HGGeS4HsNR+UDkSqELCfy0yFI4KGlOVhftHBjqE3xny0yiPjekY37hUMiAUsvIkOCxZe
+				sNw8EcEmQ0LBgsgzWiRmc3cY4c+XmgsbJKhSwYhPVZIbj5HnAgMBAAGjfzB9MAkGA1UdEwQCMAAw
+				CwYDVR0PBAQDAgXgMCMGCWCGSAGG+EIBDQQWFhRTaWduaWNhdCBDZXJ0aWZpY2F0ZTAdBgNVHQ4E
+				FgQUYMQXySEJc9Q/zGqvkuPUQ6nySQAwHwYDVR0jBBgwFoAUstl+DZ605NwX3br661U41SHRS/Yw
+				DQYJKoZIhvcNAQELBQADggEBAIW91gTlnn3EduMtTX4JiwLEBbs4z57Tgf3Gp01VzV1DemK0BNuT
+				KlVl+jMXmJJAKwuyizoLEqTkOva1z9o3ozUxhwqIVdtu5N5XaXjqgMm3wUDQjD5199nopI8SeWf7
+				C17s70wNF8O2h2hyn/FSi8mn28Gm4Jqi/U+X/gGKEP3bOGqBrptsSqAi6U8yvdN7PNGqSSGKWeG+
+				7yX1u4BPW8mWy93Hi+cuEe0oIdOVrEbUKoFVy4bcE69sG6RxTmaELjCy0OmoW16UoHJwIDyJWXx9
+				qkS5sFcT/jb3kuSnZ17ZC99EgScO8NKuKrJgHei9k13xSwsUAmnI7mInW4CfJ0c=
+				</ds:X509Certificate>
+      </ds:X509Data>
+    </ds:KeyInfo>
+  </ds:Signature>
+  <Status>
+    <StatusCode Value="samlp:Success"/>
+  </Status>
+  <Assertion xmlns="urn:oasis:names:tc:SAML:1.0:assertion" AssertionID="_b8abc46de005d9a3fc011037bec0b856" IssueInstant="2018-05-16T10:16:20.077Z" Issuer="test.signicat.com/std" MajorVersion="1" MinorVersion="1">
+    <Conditions NotBefore="2018-05-16T10:16:20.077Z" NotOnOrAfter="2018-05-16T10:16:50.077Z"/>
+    <AuthenticationStatement AuthenticationInstant="2018-05-16T10:16:19.889Z" AuthenticationMethod="urn:ksi:names:SAML:2.0:ac:OCES">
+      <Subject>
+        <NameIdentifier Format="urn:kantega:ksi:3.0:nameid-format:fnr">0707580210</NameIdentifier>
+        <SubjectConfirmation>
+          <ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:bearer</ConfirmationMethod>
+        </SubjectConfirmation>
+      </Subject>
+    </AuthenticationStatement>
+    <AttributeStatement>
+      <Subject>
+        <NameIdentifier Format="urn:kantega:ksi:3.0:nameid-format:fnr">0707580210</NameIdentifier>
+        <SubjectConfirmation>
+          <ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:bearer</ConfirmationMethod>
+        </SubjectConfirmation>
+      </Subject>
+      <Attribute AttributeName="nemid" AttributeNamespace="unique-id">
+        <AttributeValue>9208-2002-2-963154826612</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="unique-id" AttributeNamespace="signicat">
+        <AttributeValue>9208-2002-2-963154826612</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="service-name" AttributeNamespace="signicat">
+        <AttributeValue>demo</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="method-name" AttributeNamespace="signicat">
+        <AttributeValue>nemid</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="plain-name" AttributeNamespace="signicat">
+        <AttributeValue>Theodora Mathiesen</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="firstname" AttributeNamespace="nemid">
+        <AttributeValue>Theodora</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="lastname" AttributeNamespace="nemid">
+        <AttributeValue>Mathiesen</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="security-level" AttributeNamespace="signicat">
+        <AttributeValue>3</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="subject-serial-number" AttributeNamespace="nemid">
+        <AttributeValue>PID:9208-2002-2-963154826612</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="plain-name" AttributeNamespace="oces">
+        <AttributeValue>Theodora Mathiesen</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="pid" AttributeNamespace="nemid">
+        <AttributeValue>9208-2002-2-963154826612</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="cpr" AttributeNamespace="nemid">
+        <AttributeValue>0707580210</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="dk.cpr" AttributeNamespace="national-id">
+        <AttributeValue>0707580210</AttributeValue>
+      </Attribute>
+      <Attribute AttributeName="national-id" AttributeNamespace="signicat">
+        <AttributeValue>0707580210</AttributeValue>
+      </Attribute>
+    </AttributeStatement>
+  </Assertion>
+</Response>

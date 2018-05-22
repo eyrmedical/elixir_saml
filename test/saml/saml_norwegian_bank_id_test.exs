@@ -1,10 +1,10 @@
-defmodule NorwegianBankIDTest do
+defmodule SAML.NorwegianBankIDTest do
     use ExUnit.Case
-    alias NorwegianBankID, as: BankID
+    alias SAML.NorwegianBankID, as: BankID
     doctest BankID
 
     setup_all do
-        "SAMLResponse:" <> response = File.read!("./test/assets/bankid_response.txt")
+        "SAMLResponse:" <> response = File.read!("./test/assets/bankid_base64.txt")
         "SAMLResponse:" <> error_response = File.read!("./test/assets/bankid_error_response.txt")
         %{response: response, error_response: error_response }
     end
