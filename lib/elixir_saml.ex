@@ -9,31 +9,11 @@ defmodule ElixirSAML do
   alias ElixirSAML.{Conditions, Identity}
   import SweetXml, only: [xpath: 2, sigil_x: 2]
 
-  @audience Application.get_env(:elixir_saml, :audience, nil)
-
-  @typedoc "XML formatted string"
-  @type xml :: String.t()
-
-  @typedoc "XML AttributeName"
-  @type attribute_name :: String.t()
-
-  @typedoc "XML AttributeValue"
-  @type attribute_value :: any()
-
-  @typedoc "XML AttributeValue as string"
-  @type attribute_string_value :: String.t()
-
   @typedoc "SAML Base64 encoded response"
   @type saml_base_64 :: String.t()
 
-  @typedoc "Conditions dates"
-  @type conditions_dates :: {atom(), %DateTime{}, %DateTime{}} | {atom(), String.t()}
-
-  @typedoc "Current date"
-  @type current_date :: %DateTime{}
-
   @typedoc "Authentication result"
-  @type result :: {atom(), %Identity{}} | {atom(), String.t()}
+  @type result :: {atom()} | {atom(), String.t()}
 
   defmodule InvalidResponse do
     @moduledoc """
@@ -54,15 +34,47 @@ defmodule ElixirSAML do
     end
   end
 
-  @spec verify(saml_base_64) :: result
-  def verify(saml_base_64) do
-    with {:ok, decoded_response} <- decode_response(saml_base_64),
-         {:ok, saml_document} <- verify_signature(decoded_response),
-         {:ok, saml_document} <- check_status_code(saml_document),
-         {:ok, %Conditions{} = conditions} <- Conditions.parse(saml_document),
-         {:ok, "Date check passed"} <- Conditions.verify_date(conditions),
-         {:ok, %Conditions{}} <- Conditions.verify_audience(conditions, @audience) do
-      {:ok, conditions}
+  @spec verify(saml_base_64, %DateTime{}) :: result
+  def verify(saml_base_64, server_time \\ DateTime.utc_now()) do
+    with {:ok, saml_document} <- ElixirSAML.verify_document(saml_base_64),
+         {:ok, %Conditions{}} <- Conditions.verify(saml_document, server_time) do
+      {:ok, saml_document}
+    else
+      {:error, %InvalidResponse{message: message}} ->
+        {:error, message}
+
+      {:error, error} when is_bitstring(error) ->
+        {:error, error}
+
+      _ ->
+        {:error, "Failed to parse or verify SAML Response"}
+    end
+  end
+
+  @spec verify_document(saml_base_64) :: result
+  def verify_document(saml_base_64) do
+    with {:ok, saml_document} <- parse_document(saml_base_64),
+         {:ok, saml_document} <- verify_signature(saml_document),
+         {:ok, saml_document} <- check_status_code(saml_document) do
+      {:ok, saml_document}
+    end
+  end
+
+  @doc """
+  Parse a 64-bit SAML response into a `:xmerl` document
+  """
+  @spec parse_document(saml_base_64) :: result
+  def parse_document(saml_base_64) do
+    with {:ok, decoded_response} <-
+           Base.decode64(saml_base_64, ignore: :whitespace, padding: false),
+         {doc, []} <-
+           decoded_response
+           |> :binary.bin_to_list()
+           |> :xmerl_scan.string(quiet: true) do
+      {:ok, doc}
+    else
+      _ ->
+        {:error, "Failed to parse SAML document"}
     end
   end
 
@@ -70,50 +82,27 @@ defmodule ElixirSAML do
   Verify that a SAML document was signed by certificate using Erlang native modules.
   Keep in mind that we don't verify digest for the assertion block.
   """
-  @spec verify_signature(xml) :: {atom(), xml}
-  def verify_signature(saml_document) do
-    {doc, []} =
-      saml_document
-      |> :binary.bin_to_list()
-      |> :xmerl_scan.string(quiet: true)
-
-    {:xmerl_dsig.verify(doc), doc}
+  def verify_signature(document) do
+    {:xmerl_dsig.verify(document), document}
   end
 
-  @spec verify_signature!(saml_base_64) :: atom()
-  def verify_signature!(saml_document) do
-    case verify_signature(saml_document) do
-      {:ok, _doc} -> :ok
-      _ -> :error
-    end
+  def verify_signature!(document) do
+    :xmerl_dsig.verify(document)
   end
 
   @doc """
   Check that the status code is `Success`.
   """
   @spec check_status_code(String.t()) :: {atom(), String.t()}
-  def check_status_code(xml) do
-    with "samlp:Success" <- xpath(xml, ~x"//Status/@StatusCode/@Value") |> IO.inspect do
-      {:ok, xml}
-    else
-      _ ->
-        error = xpath(xml, ~x"//*[local-name()='StatusMessage']/text()")
-
-        error =
-          Regex.replace(~r/(urn:signicat:error:|;)/, error, ":")
-          |> String.split(":", trim: true)
-
-        case error do
-          ["usercancel", _] -> {:cancel, ""}
-          ["bankid", _, code | _] -> {:bankid, code}
-          ["bankid" | _] -> {:bankid, ""}
-          _ -> {:generic, ""}
-        end
+  def check_status_code(saml) do
+    case xpath(saml, ~x"//Status/StatusCode/@Value"s) do
+      "samlp:Success" -> {:ok, saml}
+      "samlp:Responder" -> {:error, extract_status_error(saml)}
+      _ -> {:error, "SAML Status code check failed"}
     end
   end
 
-  @spec decode_response(saml_base_64) :: {atom(), xml}
-  def decode_response(saml_response) do
-    Base.decode64(saml_response, ignore: :whitespace, padding: false)
+  defp extract_status_error(saml) do
+    xpath(saml, ~x"//Status/StatusMessage/text()"s)
   end
 end

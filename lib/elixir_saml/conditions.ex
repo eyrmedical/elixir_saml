@@ -5,10 +5,25 @@ defmodule ElixirSAML.Conditions do
   require Logger
 
   @latency_compensation Application.get_env(:elixir_saml, :latency_compensation, 0)
+  @audience Application.get_env(:elixir_saml, :audience, nil)
 
   defstruct not_before: "",
             not_on_or_after: "",
             audience_restrictions: []
+
+  @doc """
+  Verify a conditions statement against an authentication request
+  """
+  def verify(
+        saml_document,
+        server_time \\ DateTime.utc_now()
+      ) do
+    with {:ok, %ElixirSAML.Conditions{} = conditions} <- parse(saml_document),
+         {:ok, "Date check passed"} <- verify_date(conditions, server_time),
+         {:ok, conditions} <- verify_audience(conditions, @audience) do
+      {:ok, conditions}
+    end
+  end
 
   @doc """
   Check that current date is within `<Conditions NotBefore="date" NotOnOrAfter="date" />`.
@@ -40,15 +55,15 @@ defmodule ElixirSAML.Conditions do
           {:error, "Invalid dates passed to SAML Conditions"}
       end
 
-    if elem(result, 0) === :error do
+    if elem(result, 0) === :error and Mix.env() != :test do
       Logger.error(fn ->
         """
 
         #{elem(result, 1)}
 
-        SAML not before:     	#{DateTime.to_string(not_before)}
-        Server time:       		#{DateTime.to_string(now)}
-        SAML not on or after:  	#{DateTime.to_string(not_on_or_after)}
+        SAML not before:        #{DateTime.to_string(not_before)}
+        Server time:            #{DateTime.to_string(now)}
+        SAML not on or after:   #{DateTime.to_string(not_on_or_after)}
 
         The SAML response timestamp is inconsistent with server time.
 

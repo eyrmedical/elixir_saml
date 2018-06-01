@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<Response xmlns="urn:oasis:names:tc:SAML:1.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:1.0:assertion" xmlns:samlp="urn:oasis:names:tc:SAML:1.0:protocol" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" IssueInstant="2017-02-17T13:47:57.679Z" MajorVersion="1" MinorVersion="1" Recipient="http://localhost:4000/login?_csrf_token=AHcnKlINIXctfTV6L0FEGA4XCBA9JgAA7FBpeJQFxOd9l%2Bpa6PxZVQ%3D%3D" ResponseID="_5f3c63a785035cd57f8d16002222ac72">
+  <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+    <ds:SignedInfo>
+      <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+      <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+      <ds:Reference URI="#_5f3c63a785035cd57f8d16002222ac72">
+        <ds:Transforms>
+          <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+          <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#">
+            <ec:InclusiveNamespaces xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#" PrefixList="code ds kind rw saml samlp typens #default xsd xsi"/>
+          </ds:Transform>
+        </ds:Transforms>
+        <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+        <ds:DigestValue>DiBrEVjYMiU0tNuVySKRfZf6nMQ=</ds:DigestValue>
+      </ds:Reference>
+    </ds:SignedInfo>
+    <ds:SignatureValue>
+		K/7RCLMC4vUEbUcJch16wQMAbZ9CqiM4iD6Y5WT850kE7IxFwTUhfczbjtvwQSTlPOgiMnBJZ8Mh
+		xlMpSv8ncF8ERxIvg6Bvc2+9kW/9+v1H9nqW7Hk+JILAVL7+ZBtqd9B9j/RWn7RgXMgkTaL6sKYC
+		YaSc+TJyyM1O75/ezYX2ntOOPt/IDrIkX7Fj74VBqtJ0ff+/Uxuximeyf6mAf/y66w8IKz6VC2fG
+		bzlPS5Tyz0KaflvfhxluMxEJt86mpHJ8ag+1vc2LC27sG6EB9B4035sBuG+6ShDymPwulx6bzFip
+		clK4ZR1+IlZZtlyhzN8doz0ncRga5dNWuM/glw==
+	</ds:SignatureValue>
+    <ds:KeyInfo>
+      <ds:X509Data>
+        <ds:X509Certificate>
+			MIIDuzCCAqOgAwIBAgIBDjANBgkqhkiG9w0BAQsFADBJMQswCQYDVQQGEwJOTzEUMBIGA1UEChML
+			U2lnbmljYXQgQVMxJDAiBgNVBAMTG1NpZ25pY2F0IEV4dGVybmFsIENBICgyMDQ4KTAeFw0xNTA1
+			MTIxMzA4MzVaFw0xNzA5MjMxMzA4MzVaMHgxCzAJBgNVBAYTAk5PMQ8wDQYDVQQIDAZOb3J3YXkx
+			EjAQBgNVBAcMCVRyb25kaGVpbTERMA8GA1UECgwIU2lnbmljYXQxETAPBgNVBAsMCFNpZ25pY2F0
+			MR4wHAYDVQQDDBV0ZXN0LnNpZ25pY2F0LmNvbS9zdGQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
+			ggEKAoIBAQCnVHnRlvqzV6RPNjPTSOqboAH8xJwOR2hncTcYsVZ8U5TLYAwaphaiGa5Sx2PGpi/R
+			8+uVyxAm3EdOcXBIg60sfZ7dhXl78x0porzXA4wxFTd3wTpAYh/jt2JX0aLnEtYATvVzW1xatmQO
+			DBhBpwZ0Gj352FadQFVobqhKkJJkguudQ6z0QpZiRRDuA1vXXrnCmwCfzXmGXVOfMIfgkvPz85EG
+			d5Y365UALDLWcbamk7Z/llEXc+oaOR6amdFVxnH3ksSyfZ+Hhi2G9qijiLKs1qp516pwVdb3flry
+			JRsoa9GccS68rQN6EzD+S9io7qmUGQkfBpKd9s8O2SwqhSjtAgMBAAGjfzB9MAkGA1UdEwQCMAAw
+			CwYDVR0PBAQDAgXgMCMGCWCGSAGG+EIBDQQWFhRTaWduaWNhdCBDZXJ0aWZpY2F0ZTAdBgNVHQ4E
+			FgQUlvBuK7QGLkIZlNUxMaZwjtVOZyIwHwYDVR0jBBgwFoAUstl+DZ605NwX3br661U41SHRS/Yw
+			DQYJKoZIhvcNAQELBQADggEBAEhA48Ioyr6qSySmFBmxitUC+421IgTZ6ZOPLE8u0QLCXuUdwicO
+			OAtn5ue3iSq6kxMI5jPa3JFQdX/sCgeON0jZGCvcJ8DOw4ScwR7OjLk0cHLpb1t+8ns9YAPjy0Ho
+			69N0L4vSujKWA4pw3T2Hw2XIKRSqfgfrjAlSXBugQNl0NB9PmCvUbfHwGsz1ldgNjAUfMweSyRfi
+			R6ZrRaUjzB93q2cpY4kWVgCld0Kw+Qu/qaEXn1BpA7Lf9ZDyMQjqbbEug2t40Y/Ey90eYotj5cHg
+			B5XLK+N1Z8S6fmWFwGiMYDCvg60dOUfLp4b/7KK0aj79l7WH7f6FCeT0uIuqpdQ=
+</ds:X509Certificate>
+      </ds:X509Data>
+    </ds:KeyInfo>
+  </ds:Signature>
+  <Status>
+    <StatusCode Value="samlp:Responder"/>
+    <StatusMessage>urn:signicat:error:usercancel; The process was aborted by the end user</StatusMessage>
+  </Status>
+</Response>

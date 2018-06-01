@@ -1,12 +1,11 @@
 defmodule ElixirSAML.ConditionsTest do
   use ExUnit.Case
-  alias ElixirSAML
-  alias ElixirSAML.Conditions
+  alias ElixirSAML.{Conditions}
 
   setup_all do
-    bankid_response = File.read!("test/assets/bankid") |> ElixirSAML.decode_response!()
+    {:ok, saml_document} = File.read!("test/assets/bankid") |> ElixirSAML.parse_document()
 
-    %{bankid_response: bankid_response}
+    %{bankid_response: saml_document}
   end
 
   test "Parse XML into Conditions struct", state do
@@ -46,7 +45,7 @@ defmodule ElixirSAML.ConditionsTest do
   test "Verify Condition date fails when passing a later server time", state do
     {:ok, conditions} = Conditions.parse(state.bankid_response)
 
-    assert {:error, "Server time is after the SAML NotBefore date."} =
+    assert {:error, "Server time is after the SAML NotBefore date"} =
              Conditions.verify_date(conditions)
   end
 
@@ -68,7 +67,7 @@ defmodule ElixirSAML.ConditionsTest do
       zone_abbr: "UTC"
     }
 
-    assert {:error, "Server time is before the SAML NotBefore date."} =
+    assert {:error, "Server time is before the SAML NotBefore date"} =
              Conditions.verify_date(conditions, test_datetime_override)
   end
 

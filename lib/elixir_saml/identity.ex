@@ -6,5 +6,5 @@ defmodule ElixirSAML.Identity do
             last_name: "",
             date_of_birth: "",
             gender: "",
-            origin: :nil
+            origin: nil
 end

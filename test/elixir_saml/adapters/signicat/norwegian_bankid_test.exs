@@ -1,20 +1,41 @@
 defmodule NorwegianBankIDTest do
   use ExUnit.Case
   alias ElixirSAML.{Identity, InvalidResponse}
+  alias ElixirSAML.Adapters.Signicat.NorwegianBankID
 
-  test "Successful BankID authorization with signicat.com" do
-    {:ok, bankid_response} = File.read("test/assets/bankid")
-    assert {:ok, %Identity{ origin: :norwegian_bankid }} = ElixirSAML.verify(bankid_response)
+  setup_all do
+    {:ok, bankid_base_64} = File.read("test/assets/bankid")
+
+    mock_server_time = %DateTime{
+      calendar: Calendar.ISO,
+      day: 19,
+      hour: 16,
+      microsecond: {705_000, 3},
+      minute: 4,
+      month: 12,
+      second: 14,
+      std_offset: 0,
+      time_zone: "Etc/UTC",
+      utc_offset: 0,
+      year: 2016,
+      zone_abbr: "UTC"
+    }
+
+    %{bankid_base_64: bankid_base_64, mock_server_time: mock_server_time}
   end
 
-  test "User cancelled BankID authorization with signicat.com" do
-    {:ok, error_response} = File.read("test/assets/bankid_error")
-    assert {:error, %InvalidResponse{message: "User cancelled authentication"}} =
-             ElixirSAML.verify(error_response)
-  end
+  test "Example of a valid SAML authorization check", state do
+    assert {:ok, saml_document} = ElixirSAML.verify(state.bankid_base_64, state.mock_server_time)
 
-  test "Determine gender from Norwegian national ID" do
-    {:ok, bankid_response} = File.read("test/assets/bankid")
-    assert {:ok, %Identity{gender: "male"}} = ElixirSAML.verify(bankid_response)
+    assert {:ok,
+            %Identity{
+              date_of_birth: "1980-01-01",
+              first_name: "Test",
+              gender: "male",
+              last_name: "Pasient",
+              national_id: "01018037731",
+              origin: :norwegian_bankid,
+              uid: "9578-6000-4-129724"
+            }} = NorwegianBankID.parse_assertion(saml_document)
   end
 end
