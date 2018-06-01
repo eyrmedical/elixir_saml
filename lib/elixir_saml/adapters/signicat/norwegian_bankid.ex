@@ -1,9 +1,9 @@
-defmodule ElixirSaml.Adapters.Signicat.NorwegianBankID do
+defmodule ElixirSAML.Adapters.Signicat.NorwegianBankID do
 	@moduledoc """
 	Wrapper for SAML 1.1 authorization to parse Signicat's Norwegian BankID response.
 	"""
 	alias SAML
-  alias ElixirSaml.Adapters.Signicat.NorwegianBankID
+  alias ElixirSAML.Adapters.Signicat.NorwegianBankID
 	require Logger
 
 	defmodule UserData do

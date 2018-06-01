@@ -1,40 +1,10 @@
-defmodule ElixirSaml.Adapters.Signicat.DanishNemID do
+defmodule ElixirSAML.Adapters.Signicat.DanishNemID do
 	@moduledoc """
 	Wrapper for SAML 1.1 authorization to parse Signicat's Danish NemID response.
 	"""
-	alias SAML
-  alias ElixirSaml.Adapters.Signicat.DanishNemID
+	alias ElixirSAML.{UserData, InvalidResponse}
 	require Logger
 
-	defmodule UserData do
-		@moduledoc false
-		defstruct \
-			uid: "",
-			national_id: "",
-			first_name: "",
-			last_name: "",
-			date_of_birth: "",
-			gender: ""
-	end
-
-	defmodule InvalidResponse do
-		@moduledoc """
-		Exception raised with invalid SAML response.
-		"""
-		defexception message: "Invalid SAML 1.1 response"
-
-		def generic do
-			exception(message: "Invalid SAML 1.1 response")
-		end
-
-		def invalid_signature do
-			exception(message: "Invalid SAML signature")
-		end
-
-		def exception(opts) do
-			%InvalidResponse{message: Keyword.fetch!(opts, :message)}
-		end
-	end
 
 	@typedoc "SAML formatted XML string"
 	@type xml :: String.t
@@ -43,7 +13,7 @@ defmodule ElixirSaml.Adapters.Signicat.DanishNemID do
 	@type saml_response :: String.t
 
 	@typedoc "Result of verification check"
-	@type result :: {:ok, %DanishNemID.UserData{}} | {:error, %InvalidResponse{}}
+	@type result :: {:ok, %UserData{}} | {:error, %InvalidResponse{}}
 
 
 	@doc """
