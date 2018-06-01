@@ -85,14 +85,4 @@ defmodule ElixirSAML.Adapters.Signicat.DanishNemID do
 			_ -> {:error, "SAML processing caused an unexpected error"}
 		end
 	end
-
-
-  @spec determine_gender(String.t) :: String.t
-  defp determine_gender(nor_national_id) do
-    {charcode, _} = nor_national_id |> String.to_charlist |> List.pop_at(8)
-    case [charcode] |> List.to_integer |> rem(2) do
-      1 -> "male"
-      0 -> "female"
-    end
-  end
 end

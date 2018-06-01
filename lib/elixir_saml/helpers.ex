@@ -2,18 +2,7 @@ defmodule ElixirSAML.Helpers do
   @moduledoc false
 
   import SweetXml, only: [xpath: 2, sigil_x: 2]
-  @doc """
-  Extracts Assertion Attributes from SAML document.
-  """
-  @spec extract_assertion_attribute(xml, attribute_name) :: attribute_value
-  def extract_assertion_attribute(xml, attribute_name) do
-    xpath(xml, ~x"Assertion/AttributeStatement/Attribute[contains(@AttributeName,'#{attribute_name}')]/AttributeValue/text()")
-  end
-  @spec extract_assertion_attribute_as_string(xml, attribute_name) :: attribute_string_value
-  def extract_assertion_attribute_as_string(xml, attribute_name) do
-    extract_assertion_attribute(xml, attribute_name)
-    |> to_string()
-  end
+
 
 
   @doc """

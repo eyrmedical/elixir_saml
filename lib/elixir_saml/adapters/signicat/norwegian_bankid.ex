@@ -3,39 +3,9 @@ defmodule ElixirSAML.Adapters.Signicat.NorwegianBankID do
 	Wrapper for SAML 1.1 authorization to parse Signicat's Norwegian BankID response.
 	"""
 	alias SAML
-  alias ElixirSAML.Adapters.Signicat.NorwegianBankID
 	require Logger
 
-	defmodule UserData do
-		@moduledoc false
-		defstruct \
-			uid: "",
-			national_id: "",
-			first_name: "",
-			last_name: "",
-			date_of_birth: "",
-			gender: ""
-	end
-
-	defmodule InvalidResponse do
-		@moduledoc """
-		Exception raised with invalid SAML response.
-		"""
-		defexception message: "Invalid SAML 1.1 response"
-
-		def generic do
-			exception(message: "Invalid SAML 1.1 response")
-		end
-
-		def invalid_signature do
-			exception(message: "Invalid SAML signature")
-		end
-
-		def exception(opts) do
-			%InvalidResponse{message: Keyword.fetch!(opts, :message)}
-		end
-	end
-
+	
 	@typedoc "SAML formatted XML string"
 	@type xml :: String.t
 
@@ -72,28 +42,6 @@ defmodule ElixirSAML.Adapters.Signicat.NorwegianBankID do
 	  end
 	end
 
-	@doc """
-	Check that the status code is `Success`.
-	"""
-	@spec check_status(String.t()) :: {atom(), String.t()}
-	def check_status(xml) do
-	  with "samlp:Success" <-
-			SAML.extract_string_value(xml, "//*[local-name()='StatusCode']/@Value")
-	  do
-			{:ok, xml}
-	  else
-		_ ->
-		  error = SAML.extract_string_value(xml, "//*[local-name()='StatusMessage']/text()")
-		  error = Regex.replace(~r/(urn:signicat:error:|;)/, error, ":")
-				|> String.split(":", trim: true) 
-		  case error do
-			  ["usercancel", _]       -> {:cancel,  ""}
-			  ["bankid", _, code | _] -> {:bankid,  code}
-			  ["bankid" | _]          -> {:bankid,  ""}
-			  _                       -> {:generic, ""}
-		  end
-		end
-	end
 
 	@doc """
 	Validate and extract user information from the SAML assertions block.
