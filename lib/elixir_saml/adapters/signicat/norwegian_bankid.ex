@@ -11,22 +11,6 @@ defmodule ElixirSAML.Adapters.Signicat.NorwegianBankID do
 
   @doc """
   Verify BankID SAML response, check the assertions and retrieve user data.
-
-
-  result = doc |> xpath(
-  ~x"//matchups/matchup"l,
-  name: ~x"./name/text()",
-  winner: [
-    ~x".//team/id[.=ancestor::matchup/@winner-id]/..",
-    name: ~x"./name/text()"
-  ]
-  )
-  assert result == [
-  %{name: 'Match One', winner: %{name: 'Team One'}},
-  %{name: 'Match Two', winner: %{name: 'Team Two'}},
-  %{name: 'Match Three', winner: %{name: 'Team One'}}
-  ]
-
   """
   @spec parse_assertion(Tuple.t()) :: result
   def parse_assertion(saml) do
