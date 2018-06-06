@@ -39,7 +39,7 @@ defmodule ElixirSAML.ConditionsTest do
       zone_abbr: "UTC"
     }
 
-    assert {:ok, conditions} = Conditions.verify_date(conditions, test_datetime_override)
+    assert {:ok, "Date check passed"} = Conditions.verify_date(conditions, test_datetime_override)
   end
 
   test "Verify Condition date fails when passing a later server time", state do

@@ -1,6 +1,6 @@
 defmodule NorwegianBankIDTest do
   use ExUnit.Case
-  alias ElixirSAML.{Identity, InvalidResponse}
+  alias ElixirSAML.{Identity}
   alias ElixirSAML.Adapters.Signicat.NorwegianBankID
 
   setup_all do

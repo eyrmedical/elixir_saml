@@ -25,6 +25,6 @@ defmodule ElixirSAMLTest do
 
   test "Check condition dates fails without overriding date" do
     {:ok, bankid} = File.read("test/assets/bankid")
-    assert {:error, xml} = ElixirSAML.verify(bankid)
+    assert {:error, _saml_document} = ElixirSAML.verify(bankid)
   end
 end

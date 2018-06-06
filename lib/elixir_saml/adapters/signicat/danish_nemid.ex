@@ -24,7 +24,7 @@ defmodule ElixirSAML.Adapters.Signicat.DanishNemID do
           value: ~x"./AttributeValue/text()"s
         )
 
-        national_id = extract(attribute_statement, "national-id")
+      national_id = extract(attribute_statement, "national-id")
 
       {:ok,
        %Identity{
@@ -71,21 +71,22 @@ defmodule ElixirSAML.Adapters.Signicat.DanishNemID do
           <<mm::bytes-size(2)>> <>
           <<yy::bytes-size(2)>> <> <<century_code::bytes-size(1)>> <> <<rest::bytes-size(3)>>
       ) do
-
     century_code = String.to_integer(century_code)
     year = String.to_integer(yy)
 
     year = year(century_code, year)
     year <> "-" <> mm <> "-" <> dd
   end
+
   def determine_birthdate(b), do: b
 
   defp year(cc, yy) do
-    century = case cc do
-      cc when cc <= 3 -> "19"
-      cc when cc in [4, 9] -> if yy > 36, do: "19", else: "20"
-      _ -> if yy > 57, do: "18", else: "20"
-    end
+    century =
+      case cc do
+        cc when cc <= 3 -> "19"
+        cc when cc in [4, 9] -> if yy > 36, do: "19", else: "20"
+        _ -> if yy > 57, do: "18", else: "20"
+      end
 
     year = if yy < 10, do: "0#{yy}", else: "#{yy}"
 

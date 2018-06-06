@@ -1,6 +1,6 @@
 defmodule DanishNemIDTest do
   use ExUnit.Case
-  alias ElixirSAML.{Identity, InvalidResponse}
+  alias ElixirSAML.{Identity}
   alias ElixirSAML.Adapters.Signicat.DanishNemID
 
   setup_all do
