@@ -3,7 +3,7 @@ defmodule ElixirSAML.Adapters.Signicat.DanishNemID do
   Wrapper for SAML 1.1 authorization to parse Signicat's Norwegian BankID assertion.
   """
   alias ElixirSAML.{Identity, InvalidResponse}
-  import SweetXml, only: [xpath: 2, xpath: 3, sigil_x: 2]
+  import SweetXml, only: [xpath: 3, sigil_x: 2]
   require Logger
 
   @typedoc "Result of verification check"
@@ -69,7 +69,7 @@ defmodule ElixirSAML.Adapters.Signicat.DanishNemID do
   def determine_birthdate(
         <<dd::bytes-size(2)>> <>
           <<mm::bytes-size(2)>> <>
-          <<yy::bytes-size(2)>> <> <<century_code::bytes-size(1)>> <> <<rest::bytes-size(3)>>
+          <<yy::bytes-size(2)>> <> <<century_code::bytes-size(1)>> <> <<_rest::bytes-size(3)>>
       ) do
     century_code = String.to_integer(century_code)
     year = String.to_integer(yy)
@@ -78,8 +78,17 @@ defmodule ElixirSAML.Adapters.Signicat.DanishNemID do
     year <> "-" <> mm <> "-" <> dd
   end
 
-  def determine_birthdate(b), do: b
+  # 7th number in Danish CPR numbers is a "century_code" which will
+  # calculate which century a year is in based on it's value combined
+  # with what period the year is in:
 
+  # |      |         Year          |
+  # | Code | 00-36 | 37-57 | 58-99 |
+  # | ---- | ----- | ----– | ----– |
+  # | 0-3  | 1900  | 1900  | 1900  |
+  # | 4    | 2000  | 1900  | 1900  |
+  # | 5-8  | 2000  | 2000  | 1800  |
+  # | 9    | 2000  | 1900  | 1900  |
   defp year(cc, yy) do
     century =
       case cc do
@@ -88,6 +97,7 @@ defmodule ElixirSAML.Adapters.Signicat.DanishNemID do
         _ -> if yy > 57, do: "18", else: "20"
       end
 
+    # Add zero padding
     year = if yy < 10, do: "0#{yy}", else: "#{yy}"
 
     century <> year
