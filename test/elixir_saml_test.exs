@@ -44,7 +44,7 @@ defmodule ElixirSAMLTest do
     }
   end
 
-  test "Check signature", state do 
+  test "Check signature", state do
     assert {:ok, _} = ElixirSAML.verify(state.bankid_response, state.bankid_mock_server_time)
     assert {:ok, _} = ElixirSAML.verify(state.nemid_response, state.nemid_mock_server_time)
   end
