@@ -4,7 +4,7 @@ defmodule DanishNemIDTest do
   alias ElixirSAML.Adapters.Signicat.DanishNemID
 
   setup_all do
-    {:ok, bankid_base_64} = File.read("test/assets/nemid")
+    {:ok, nemid_base_64} = File.read("test/assets/nemid")
 
     mock_server_time = %DateTime{
       calendar: Calendar.ISO,
@@ -21,11 +21,11 @@ defmodule DanishNemIDTest do
       zone_abbr: "UTC"
     }
 
-    %{bankid_base_64: bankid_base_64, mock_server_time: mock_server_time}
+    %{nemid_base_64: nemid_base_64, mock_server_time: mock_server_time}
   end
 
   test "Example of a valid SAML authorization check", state do
-    assert {:ok, saml_document} = ElixirSAML.verify(state.bankid_base_64, state.mock_server_time)
+    assert {:ok, saml_document} = ElixirSAML.verify(state.nemid_base_64, state.mock_server_time)
 
     assert {:ok,
             %Identity{

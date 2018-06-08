@@ -6,7 +6,7 @@ defmodule ElixirSAML do
   we don't verify SAML 1.0 assertions in it.
   """
   import SweetXml
-  alias ElixirSAML.{Conditions, Identity}
+  alias ElixirSAML.{Conditions, Identity, Adapters}
   import SweetXml, only: [xpath: 2, sigil_x: 2]
 
   @typedoc "SAML Base64 encoded response"
@@ -57,6 +57,22 @@ defmodule ElixirSAML do
          {:ok, saml_document} <- verify_signature(saml_document),
          {:ok, saml_document} <- check_status_code(saml_document) do
       {:ok, saml_document}
+    end
+  end
+
+  @doc """
+  Automatically detect adapter and parse a SAML assertion
+  """
+  def parse_assertion(saml_document) do
+    case xpath(saml_document, ~x"//AuthenticationStatement/@AuthenticationMethod"s) do
+      "urn:ksi:names:SAML:2.0:ac:BankID-NO" ->
+        Adapters.Signicat.NorwegianBankID.parse_assertion(saml_document)
+
+      "urn:ksi:names:SAML:2.0:ac:OCES" ->
+        Adapters.Signicat.DanishNemID.parse_assertion(saml_document)
+
+      _ ->
+        {:error, "No adapters found for this SAML document"}
     end
   end
 
