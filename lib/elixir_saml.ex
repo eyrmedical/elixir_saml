@@ -65,6 +65,12 @@ defmodule ElixirSAML do
   """
   def parse_assertion(saml_document) do
     case xpath(saml_document, ~x"//AuthenticationStatement/@AuthenticationMethod"s) do
+      "urn:signicat:names:SAML:2.0:ac:BankID-NO-mobile" ->
+        Adapters.Signicat.NorwegianBankID.parse_assertion(saml_document)
+
+      "urn:signicat:names:SAML:2.0:ac:BankID-NO" ->
+        Adapters.Signicat.NorwegianBankID.parse_assertion(saml_document)
+
       "urn:ksi:names:SAML:2.0:ac:BankID-NO" ->
         Adapters.Signicat.NorwegianBankID.parse_assertion(saml_document)
 
