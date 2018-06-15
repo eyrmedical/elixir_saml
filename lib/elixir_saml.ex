@@ -78,7 +78,10 @@ defmodule ElixirSAML do
         Adapters.Signicat.DanishNemID.parse_assertion(saml_document)
 
       _ ->
-        {:error, "No adapters found for this SAML document"}
+        Adapters.Signicat.NorwegianBankID.parse_assertion(saml_document)
+
+      # _ ->
+      #   {:error, "No adapters found for this SAML document"}
     end
   end
 
