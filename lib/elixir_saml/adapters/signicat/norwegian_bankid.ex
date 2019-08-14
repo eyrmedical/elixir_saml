@@ -3,7 +3,7 @@ defmodule ElixirSAML.Adapters.Signicat.NorwegianBankID do
   Wrapper for SAML 1.1 authorization to parse Signicat's Norwegian BankID assertion.
   """
   alias ElixirSAML.{Identity, InvalidResponse}
-  import SweetXml, only: [xpath: 2, xpath: 3, sigil_x: 2]
+  import SweetXml, only: [xpath: 3, sigil_x: 2]
   require Logger
 
   @typedoc "Result of verification check"
@@ -24,14 +24,17 @@ defmodule ElixirSAML.Adapters.Signicat.NorwegianBankID do
           value: ~x"./AttributeValue/text()"s
         )
 
+      national_id = extract(attribute_statement, "national-id")
+      date_of_birth = extract(attribute_statement, "date-of-birth")
+
       {:ok,
        %Identity{
          uid: extract(attribute_statement, "unique-id"),
          national_id: extract(attribute_statement, "national-id"),
          first_name: extract(attribute_statement, "firstname"),
          last_name: extract(attribute_statement, "lastname"),
-         date_of_birth: extract(attribute_statement, "date-of-birth"),
-         gender: extract(attribute_statement, "national-id") |> determine_gender,
+         date_of_birth: determine_birthdate(national_id, date_of_birth),
+         gender: determine_gender(national_id),
          origin: :norwegian_bankid
        }}
     else
@@ -55,5 +58,26 @@ defmodule ElixirSAML.Adapters.Signicat.NorwegianBankID do
       1 -> "male"
       0 -> "female"
     end
+  end
+
+  @spec determine_birthdate(String.t(), String.t()) :: String.t()
+  defp determine_birthdate(nor_national_id, fallback_birthdate) do
+    case NorwegianIdNumber.parse(nor_national_id) do
+      {:ok, %NorwegianIdNumber{
+        birth_day: birth_day,
+        birth_month: birth_month,
+        birth_year: birth_year
+      }} ->
+        "#{birth_year}-#{zero_pad(birth_month, 2)}-#{zero_pad(birth_day, 2)}"
+      _ ->
+        fallback_birthdate
+    end
+  end
+
+  @spec zero_pad(integer(), integer()) :: String.t
+  defp zero_pad(number, length) when is_integer(number) and is_integer(length) do
+    number
+    |> Integer.to_string()
+    |> String.pad_leading(length, "0")
   end
 end

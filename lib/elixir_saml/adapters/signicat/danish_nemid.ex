@@ -32,8 +32,8 @@ defmodule ElixirSAML.Adapters.Signicat.DanishNemID do
          national_id: national_id,
          first_name: extract(attribute_statement, "firstname"),
          last_name: extract(attribute_statement, "lastname"),
-         date_of_birth: national_id |> determine_birthdate(),
-         gender: national_id |> determine_gender,
+         date_of_birth: determine_birthdate(national_id),
+         gender: determine_gender(national_id),
          origin: :danish_nemid
        }}
     else
@@ -65,7 +65,7 @@ defmodule ElixirSAML.Adapters.Signicat.DanishNemID do
 
   def determine_birthdate("not_found"), do: "not_found"
 
-  @spec determine_gender(String.t()) :: String.t()
+  @spec determine_birthdate(String.t()) :: String.t()
   def determine_birthdate(
         <<dd::bytes-size(2)>> <>
           <<mm::bytes-size(2)>> <>
