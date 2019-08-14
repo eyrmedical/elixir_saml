@@ -8,7 +8,7 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 
     ```elixir
     def deps do
-      [{:elixir_saml, "~> 0.2.0"}]
+      [{:elixir_saml, "~> 0.3"}]
     end
     ```
 
